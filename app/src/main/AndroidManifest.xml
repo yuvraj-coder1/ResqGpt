@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
@@ -16,6 +17,7 @@
 
 
     <application
+       android:name=".ResQGptApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -26,9 +28,6 @@
         android:theme="@style/Theme.LlamaAndroid"
         android:windowSplashScreenBackground="#00FF00">
 
-        <activity
-            android:name=".Copy_screen"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

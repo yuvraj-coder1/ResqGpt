@@ -1,13 +1,19 @@
 package com.nervesparks.resqgpt
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -48,26 +54,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.nervesparks.resqgpt.R
-
+import com.nervesparks.resqgpt.ui.AboutScreen
 import com.nervesparks.resqgpt.ui.MainChatScreen
-
 import com.nervesparks.resqgpt.ui.SettingsScreen
 import com.nervesparks.resqgpt.ui.components.EmergencyContactScreen
 import com.nervesparks.resqgpt.ui.components.MapContent
 import java.io.File
-import android.Manifest
-import android.content.pm.PackageManager
-import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import com.nervesparks.resqgpt.ui.AboutScreen
 
 
 enum class ChatScreen(@StringRes val title: Int) {
@@ -81,7 +79,6 @@ enum class ChatScreen(@StringRes val title: Int) {
     EmergencyContactScreen(R.string.emergency_contact),
     MapScreen(R.string.map)
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,7 +97,8 @@ fun ChatScreenAppBar(
     @SuppressLint("MissingPermission")
     fun provideHapticFeedback(context: Context) {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+            val vibratorManager =
+                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
             vibratorManager?.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
@@ -246,7 +244,7 @@ fun ChatScreenAppBar(
                             .size(25.dp)
                             .graphicsLayer { rotationZ = animatedRotationAngle },
                         painter = painterResource(id = R.drawable.question_small_svgrepo_com),
-                        contentDescription = "question_svg" ,
+                        contentDescription = "question_svg",
                         tint = Color.White
                     )
                 }
@@ -254,7 +252,6 @@ fun ChatScreenAppBar(
         }
     )
 }
-
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -276,10 +273,11 @@ fun ChatScreen(
             Toast.makeText(context, "Permissions granted!", Toast.LENGTH_SHORT).show()
             val contacts = viewModel.emergencyContacts
             val numbers = contacts.map { it.phoneNumber }
-            val message = "I’m in trouble and need help urgently. Please try to contact me or send help to my last known location. This message was sent automatically."
-            viewModel.sendSmsSim1(context, numbers, message)
+            val message =
+                "I’m in trouble and need help urgently. Please try to contact me or send help to my last known location. This message was sent automatically."
         } else {
-            Toast.makeText(context, "Permissions denied. Cannot send SMS.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Permissions denied. Cannot send SMS.", Toast.LENGTH_LONG)
+                .show()
         }
     }
     // Define gradient colors
@@ -312,14 +310,21 @@ fun ChatScreen(
                     onSettingsClick = {navController.navigate(ChatScreen.Settings.name)},
                     onMapClick = {navController.navigate(ChatScreen.MapScreen.name)},
                     onSendMessagesClick = {
-                        val hasPermissions = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
+                        val hasPermissions = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_PHONE_STATE
+                        ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.SEND_SMS
+                        ) == PackageManager.PERMISSION_GRANTED
                         if (hasPermissions) {
-                            val contacts = viewModel.emergencyContacts
+                            val contacts = viewModel.emergencyContactList.value
+                            Log.d("SMS", "contacts: $contacts")
                             val numbers = contacts.map { it.phoneNumber }
-                            val message = "I’m in trouble and need help urgently. Please try to contact me or send help to my last known location. This message was sent automatically."
-                            viewModel.sendSmsSim1(context, numbers, message)
-                        }
-                        else{
+                            val message =
+                                "I’m in trouble and need help urgently. Please try to contact me or send help to my last known location. This message was sent automatically."
+                            viewModel.sendSms(context,numbers, message)
+                        } else {
                             permissionLauncher.launch(
                                 arrayOf(
                                     Manifest.permission.READ_PHONE_STATE,
@@ -378,7 +383,7 @@ fun ChatScreen(
 //                        ChatScreen.SearchResults.name
 //                    )})
 //                }
-                composable(route = ChatScreen.AboutScreen.name){
+                composable(route = ChatScreen.AboutScreen.name) {
                     AboutScreen()
                 }
 //                composable(route = ChatScreen.BenchMarkScreen.name){

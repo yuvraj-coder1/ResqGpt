@@ -3,8 +3,6 @@ package com.nervesparks.resqgpt
 import android.content.Context
 import android.llama.cpp.LLamaAndroid
 import android.net.Uri
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
@@ -14,7 +12,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.nervesparks.resqgpt.data.UserPreferencesRepository
+import com.nervesparks.resqgpt.data.loadEmergencyContacts
+import com.nervesparks.resqgpt.data.saveEmergencyContacts
+import com.nervesparks.resqgpt.data.sendSmsDirectly
 import com.nervesparks.resqgpt.model.EmergencyContact
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,21 +25,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Locale
 import java.util.UUID
-import android.app.Application
-import android.telephony.SmsManager
-import android.telephony.SubscriptionManager
-import android.widget.Toast
-import androidx.annotation.RequiresPermission
-import androidx.lifecycle.AndroidViewModel
 
-class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instance(), private val userPreferencesRepository: UserPreferencesRepository): ViewModel() {
+class MainViewModel(
+    private val llamaAndroid: LLamaAndroid = LLamaAndroid.instance(),
+    private val userPreferencesRepository: UserPreferencesRepository
+) : ViewModel() {
     companion object {
-//        @JvmStatic
-//        private val NanosPerSecond = 1_000_000_000.0
+        @JvmStatic
+        private val NanosPerSecond = 1_000_000_000.0
     }
+
     var emergencyContacts by mutableStateOf<List<EmergencyContact>>(emptyList())
         private set
     private val _emergencyContactList = MutableStateFlow<List<EmergencyContact>>(emptyList())
@@ -47,12 +48,19 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
 
     init {
         loadDefaultModelName()
+        loadContactsFromPrefs(ResQGptApp.instance.applicationContext)
     }
-    private fun loadDefaultModelName(){
+
+    fun loadContactsFromPrefs(context: Context) {
+        val list = loadEmergencyContacts(context)
+        _emergencyContactList.value = list
+    }
+
+    private fun loadDefaultModelName() {
         _defaultModelName.value = userPreferencesRepository.getDefaultModelName()
     }
 
-    fun setDefaultModelName(modelName: String){
+    fun setDefaultModelName(modelName: String) {
         userPreferencesRepository.setDefaultModelName(modelName)
         _defaultModelName.value = modelName
     }
@@ -92,7 +100,7 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
     var userGivenModel by mutableStateOf("")
     var SearchedName by mutableStateOf("")
 
-    private var textToSpeech:TextToSpeech? = null
+    private var textToSpeech: TextToSpeech? = null
 
     var textForTextToSpeech = ""
     var stateForTextToSpeech by mutableStateOf(true)
@@ -118,11 +126,12 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
         }
 
         if (defaultModelName.value.isNotEmpty()) {
-            val loadedDefaultModel = allModels.find { model -> model["name"] == defaultModelName.value }
+            val loadedDefaultModel =
+                allModels.find { model -> model["name"] == defaultModelName.value }
 
             if (loadedDefaultModel != null) {
                 val destinationPath = File(directory, loadedDefaultModel["destination"].toString())
-                if(loadedModelName.value == "") {
+                if (loadedModelName.value == "") {
                     load(destinationPath.path, userThreads = user_thread.toInt())
                 }
                 currentDownloadable = Downloadable(
@@ -137,7 +146,7 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
                     destinationPath.exists()
                 }?.let { model ->
                     val destinationPath = File(directory, model["destination"].toString())
-                    if(loadedModelName.value == "") {
+                    if (loadedModelName.value == "") {
                         load(destinationPath.path, userThreads = user_thread.toInt())
                     }
                     currentDownloadable = Downloadable(
@@ -147,13 +156,13 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
                     )
                 }
             }
-        } else{
+        } else {
             allModels.find { model ->
                 val destinationPath = File(directory, model["destination"].toString())
                 destinationPath.exists()
             }?.let { model ->
                 val destinationPath = File(directory, model["destination"].toString())
-                if(loadedModelName.value == "") {
+                if (loadedModelName.value == "") {
                     load(destinationPath.path, userThreads = user_thread.toInt())
                 }
                 currentDownloadable = Downloadable(
@@ -166,7 +175,6 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
 
         }
     }
-
 
 
     fun textToSpeech(context: Context) {
@@ -183,7 +191,8 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
                         // Add a unique utterance ID for tracking
                         val utteranceId = UUID.randomUUID().toString()
 
-                        txtToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                        txtToSpeech.setOnUtteranceProgressListener(object :
+                            UtteranceProgressListener() {
                             override fun onDone(utteranceId: String?) {
                                 // Reset state when speech is complete
                                 CoroutineScope(Dispatchers.Main).launch {
@@ -218,7 +227,6 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
     }
 
 
-
     fun stopTextToSpeech() {
         textToSpeech?.apply {
             stop()  // Stops current speech
@@ -231,9 +239,8 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
     }
 
 
-
     var toggler by mutableStateOf(false)
-    var showModal by  mutableStateOf(true)
+    var showModal by mutableStateOf(true)
     var showAlert by mutableStateOf(false)
     var switchModal by mutableStateOf(false)
     var currentDownloadable: Downloadable? by mutableStateOf(null)
@@ -241,7 +248,6 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
     override fun onCleared() {
         textToSpeech?.shutdown()
         super.onCleared()
-
         viewModelScope.launch {
             try {
 
@@ -259,8 +265,11 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
 
         // Add to messages console.
         if (userMessage != "" && userMessage != " ") {
-            if(first){
-                addMessage("system", "This is a conversation between User and Iris, a friendly chatbot. Iris is helpful, kind, honest, good at writing, and never fails to answer any requests immediately and with precision.")
+            if (first) {
+                addMessage(
+                    "system",
+                    "This is a conversation between User and Iris, a friendly chatbot. Iris is helpful, kind, honest, good at writing, and never fails to answer any requests immediately and with precision."
+                )
                 addMessage("user", "Hi")
                 addMessage("assistant", "How may I help You?")
                 first = false
@@ -285,18 +294,15 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
                                 addMessage("assistant", response)
                             }
                         }
-                }
-                finally {
+                } finally {
                     if (!getIsCompleteEOT()) {
                         trimEOT()
                     }
                 }
 
 
-
             }
         }
-
 
 
     }
@@ -326,7 +332,7 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
 //        }
 //    }
 
-    suspend fun unload(){
+    suspend fun unload() {
         llamaAndroid.unload()
     }
 
@@ -348,7 +354,8 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
                         delay(1000L) // Delay 1 second
                         val elapsedTime = System.currentTimeMillis() - benchmarkStartTime
                         if (elapsedTime > 0) {
-                            tokensPerSecondsFinal = tokensList.size.toDouble() / (elapsedTime / 1000.0)
+                            tokensPerSecondsFinal =
+                                tokensList.size.toDouble() / (elapsedTime / 1000.0)
                         }
                     }
                 }
@@ -384,25 +391,28 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
     }
 
 
-
-
-
     var loadedModelName = mutableStateOf("");
 
-    fun load(pathToModel: String, userThreads: Int)  {
+    fun load(pathToModel: String, userThreads: Int) {
         viewModelScope.launch {
-            try{
+            try {
                 llamaAndroid.unload()
-            } catch (exc: IllegalStateException){
+            } catch (exc: IllegalStateException) {
                 Log.e(tag, "load() failed", exc)
             }
             try {
                 var modelName = pathToModel.split("/")
                 loadedModelName.value = modelName.last()
                 newShowModal = false
-                showModal= false
+                showModal = false
                 showAlert = true
-                llamaAndroid.load(pathToModel, userThreads = userThreads, topK = topK, topP = topP, temp = temp)
+                llamaAndroid.load(
+                    pathToModel,
+                    userThreads = userThreads,
+                    topK = topK,
+                    topP = topP,
+                    temp = temp
+                )
                 showAlert = false
 
             } catch (exc: IllegalStateException) {
@@ -414,6 +424,7 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
             eot_str = llamaAndroid.send_eot_str()
         }
     }
+
     private fun addMessage(role: String, content: String) {
         val newMessage = mapOf("role" to role, "content" to content)
 
@@ -435,7 +446,8 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
         // Only slice if the content is longer than the EOT string
         if (lastMessageContent.length < eot_str.length) return
 
-        val updatedContent = lastMessageContent.slice(0..(lastMessageContent.length-eot_str.length))
+        val updatedContent =
+            lastMessageContent.slice(0..(lastMessageContent.length - eot_str.length))
         val updatedLastMessage = messages.last() + ("content" to updatedContent)
         messages = messages.toMutableList().apply {
             set(messages.lastIndex, updatedLastMessage)
@@ -448,12 +460,12 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
         return input.replace("\\s+".toRegex(), " ")
     }
 
-    private fun parseTemplateJson(chatData: List<Map<String, String>> ):String{
+    private fun parseTemplateJson(chatData: List<Map<String, String>>): String {
         var chatStr = ""
-        for (data in chatData){
+        for (data in chatData) {
             val role = data["role"]
             val content = data["content"]
-            if (role != "log"){
+            if (role != "log") {
                 chatStr += "$role \n$content \n"
             }
 
@@ -483,7 +495,7 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
         return llamaAndroid.getIsMarked()
     }
 
-    fun getIsCompleteEOT(): Boolean{
+    fun getIsCompleteEOT(): Boolean {
         return llamaAndroid.getIsCompleteEOT()
     }
 
@@ -495,27 +507,15 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
         _emergencyContactList.update {
             it.toMutableList().apply { add(newContact) }
         }
+        saveEmergencyContacts(ResQGptApp.instance.applicationContext, _emergencyContactList.value)
+
     }
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    fun sendSmsSim1(context: Context, numbers: List<String>, message: String) {
-        val subscriptionManager = context.getSystemService(SubscriptionManager::class.java)
-        val subscriptionList = subscriptionManager.activeSubscriptionInfoList
 
-        if (!subscriptionList.isNullOrEmpty()) {
-            val sim1SubscriptionId = subscriptionList[0].subscriptionId
-            val smsManager = SmsManager.getSmsManagerForSubscriptionId(sim1SubscriptionId)
-
+    fun sendSms(context: Context,numbers: List<String>, message: String) {
+        viewModelScope.launch(Dispatchers.IO) {
             for (number in numbers) {
-                try {
-                    smsManager.sendTextMessage(number, null, message, null, null)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "Failed to send SMS to $number", Toast.LENGTH_SHORT).show()
-                }
+                sendSmsDirectly(context,number, message)
             }
-
-            Toast.makeText(context, "Messages sent using SIM 1", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "No SIM found", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -523,9 +523,10 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
         _emergencyContactList.update {
             it.toMutableList().apply { remove(contact) }
         }
+        saveEmergencyContacts(ResQGptApp.instance.applicationContext, _emergencyContactList.value)
     }
 }
 
-fun sentThreadsValue(){
+fun sentThreadsValue() {
 
 }

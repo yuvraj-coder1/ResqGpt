@@ -94,6 +94,8 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation ("androidx.compose.runtime:runtime-livedata")
+    implementation("com.google.code.gson:gson:2.10.1")
 
 
 
