@@ -26,13 +26,20 @@ import kotlinx.coroutines.flow.update
 import java.io.File
 import java.util.Locale
 import java.util.UUID
+import android.app.Application
+import android.telephony.SmsManager
+import android.telephony.SubscriptionManager
+import android.widget.Toast
+import androidx.annotation.RequiresPermission
+import androidx.lifecycle.AndroidViewModel
 
 class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instance(), private val userPreferencesRepository: UserPreferencesRepository): ViewModel() {
     companion object {
 //        @JvmStatic
 //        private val NanosPerSecond = 1_000_000_000.0
     }
-
+    var emergencyContacts by mutableStateOf<List<EmergencyContact>>(emptyList())
+        private set
     private val _emergencyContactList = MutableStateFlow<List<EmergencyContact>>(emptyList())
     val emergencyContactList = _emergencyContactList.asStateFlow()
     private val _defaultModelName = mutableStateOf("")
@@ -55,8 +62,8 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
 
     var messages by mutableStateOf(
 
-            listOf<Map<String, String>>(),
-        )
+        listOf<Map<String, String>>(),
+    )
         private set
     var newShowModal by mutableStateOf(false)
     var showDownloadInfoModal by mutableStateOf(false)
@@ -155,9 +162,9 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
                     destinationPath
                 )
             }
-        // Attempt to find and load the first model that exists in the combined logic
+            // Attempt to find and load the first model that exists in the combined logic
 
-         }
+        }
     }
 
 
@@ -489,6 +496,29 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
             it.toMutableList().apply { add(newContact) }
         }
     }
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    fun sendSmsSim1(context: Context, numbers: List<String>, message: String) {
+        val subscriptionManager = context.getSystemService(SubscriptionManager::class.java)
+        val subscriptionList = subscriptionManager.activeSubscriptionInfoList
+
+        if (!subscriptionList.isNullOrEmpty()) {
+            val sim1SubscriptionId = subscriptionList[0].subscriptionId
+            val smsManager = SmsManager.getSmsManagerForSubscriptionId(sim1SubscriptionId)
+
+            for (number in numbers) {
+                try {
+                    smsManager.sendTextMessage(number, null, message, null, null)
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Failed to send SMS to $number", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            Toast.makeText(context, "Messages sent using SIM 1", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "No SIM found", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun deleteEmergencyContact(contact: EmergencyContact) {
         _emergencyContactList.update {
             it.toMutableList().apply { remove(contact) }

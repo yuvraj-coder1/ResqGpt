@@ -53,11 +53,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.nervesparks.resqgpt.ui.AboutScreen
+import com.nervesparks.resqgpt.R
+
 import com.nervesparks.resqgpt.ui.MainChatScreen
+
 import com.nervesparks.resqgpt.ui.SettingsScreen
 import com.nervesparks.resqgpt.ui.components.EmergencyContactScreen
 import java.io.File
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.nervesparks.resqgpt.ui.AboutScreen
 
 
 enum class ChatScreen(@StringRes val title: Int) {
@@ -81,6 +90,7 @@ fun ChatScreenAppBar(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     onSettingsClick: () -> Unit,
+    onSendMessagesClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
 ) {
@@ -147,6 +157,17 @@ fun ChatScreenAppBar(
         },
         actions = {
             if (!canNavigateBack) {
+                // 🆕 Message icon button
+                IconButton(onClick = onSendMessagesClick) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.settings_gear_rounded),
+                        contentDescription = "Send Messages",
+                        tint = Color.White,
+                        modifier = Modifier.size(25.dp)
+                    )
+                }
+            }
+            if (!canNavigateBack) {
                 IconButton(onClick = onSettingsClick) {
                     Icon(
                         painter = painterResource(id = R.drawable.settings_gear_rounded),
@@ -156,6 +177,8 @@ fun ChatScreenAppBar(
                     )
                 }
             }
+
+
             if (!canNavigateBack) {
                 IconButton(
                     onClick = {
@@ -224,6 +247,21 @@ fun ChatScreen(
     extFileDir: File?,
     navController: NavHostController = rememberNavController()
 ) {
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions.all { it.value }
+        if (granted) {
+            Toast.makeText(context, "Permissions granted!", Toast.LENGTH_SHORT).show()
+            val contacts = viewModel.emergencyContacts
+            val numbers = contacts.map { it.phoneNumber }
+            val message = "I’m in trouble and need help urgently. Please try to contact me or send help to my last known location. This message was sent automatically."
+            viewModel.sendSmsSim1(context, numbers, message)
+        } else {
+            Toast.makeText(context, "Permissions denied. Cannot send SMS.", Toast.LENGTH_LONG).show()
+        }
+    }
     // Define gradient colors
     val darkNavyBlue = Color(0xFF050a14)
     val lightNavyBlue = Color(0xFF051633)
@@ -252,6 +290,24 @@ fun ChatScreen(
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { navController.navigateUp() },
                     onSettingsClick = {navController.navigate(ChatScreen.Settings.name)},
+                    onSendMessagesClick = {
+                        val hasPermissions = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
+                        if (hasPermissions) {
+                            val contacts = viewModel.emergencyContacts
+                            val numbers = contacts.map { it.phoneNumber }
+                            val message = "I’m in trouble and need help urgently. Please try to contact me or send help to my last known location. This message was sent automatically."
+                            viewModel.sendSmsSim1(context, numbers, message)
+                        }
+                        else{
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.READ_PHONE_STATE,
+                                    Manifest.permission.SEND_SMS
+                                )
+                            )
+
+                        }
+                    },
                     viewModel = viewModel,
                     extFileDir = extFileDir
                 )
@@ -287,6 +343,7 @@ fun ChatScreen(
 
                     )
                 }
+
 //                composable(route = ChatScreen.SearchResults.name) {
 //                    if (extFileDir != null) {
 //                        SearchResultScreen(

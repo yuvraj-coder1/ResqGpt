@@ -345,7 +345,7 @@ fun MainChatScreen (
                                                 if(role == "assistant") {
                                                     Image(
                                                         painter = painterResource(
-                                                            id = R.drawable.bot_icon
+                                                            id = R.drawable.settings_gear_rounded
                                                         ),
                                                         contentDescription =  "Bot Icon",
                                                         modifier = Modifier.size(20.dp)

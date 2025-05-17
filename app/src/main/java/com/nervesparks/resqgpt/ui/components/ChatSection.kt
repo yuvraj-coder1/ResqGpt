@@ -65,7 +65,7 @@ private fun UserOrAssistantMessage(role: String, message: String, onLongClick: (
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        if (role == "assistant") MessageIcon(iconRes = R.drawable.logo, description = "Bot Icon")
+        if (role == "assistant") MessageIcon(iconRes = R.drawable.user_icon, description = "Bot Icon")
 
         Box(
             modifier = Modifier
