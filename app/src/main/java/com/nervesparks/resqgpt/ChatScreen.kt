@@ -92,6 +92,7 @@ fun ChatScreenAppBar(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     onSettingsClick: () -> Unit,
+    onMapClick: () -> Unit,
     onSendMessagesClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
@@ -156,16 +157,47 @@ fun ChatScreenAppBar(
                     )
                 }
             }
+            else{
+                if (!canNavigateBack) {
+                    IconButton(
+                        onClick = {
+                            kc?.hide()
+                            viewModel.stop()
+                            viewModel.clear()
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(25.dp),
+                            painter = painterResource(id = R.drawable.edit_3_svgrepo_com),
+                            contentDescription = "newChat",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
         },
         actions = {
             if (!canNavigateBack) {
                 // 🆕 Message icon button
                 IconButton(onClick = onSendMessagesClick) {
                     Icon(
-                        painter = painterResource(id = R.drawable.settings_gear_rounded),
+                        painter = painterResource(id = R.drawable.sos),
                         contentDescription = "Send Messages",
                         tint = Color.White,
                         modifier = Modifier.size(25.dp)
+                    )
+                }
+            }
+            if (!canNavigateBack) {
+                IconButton(
+                    onClick = onMapClick
+                )
+                 {
+                    Icon(
+                        modifier = Modifier.size(25.dp),
+                        painter = painterResource(id = R.drawable.map),
+                        contentDescription = "newChat",
+                        tint = Color.White
                     )
                 }
             }
@@ -181,22 +213,8 @@ fun ChatScreenAppBar(
             }
 
 
-            if (!canNavigateBack) {
-                IconButton(
-                    onClick = {
-                        kc?.hide()
-                        viewModel.stop()
-                        viewModel.clear()
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(25.dp),
-                        painter = painterResource(id = R.drawable.edit_3_svgrepo_com),
-                        contentDescription = "newChat",
-                        tint = Color.White
-                    )
-                }
-            }
+
+
             if (currentScreen == ChatScreen.ModelsScreen) {
                 IconButton(
                     onClick = {
@@ -292,6 +310,7 @@ fun ChatScreen(
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { navController.navigateUp() },
                     onSettingsClick = {navController.navigate(ChatScreen.Settings.name)},
+                    onMapClick = {navController.navigate(ChatScreen.MapScreen.name)},
                     onSendMessagesClick = {
                         val hasPermissions = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
                         if (hasPermissions) {
@@ -317,7 +336,7 @@ fun ChatScreen(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = ChatScreen.MapScreen.name,
+                startDestination = ChatScreen.Start.name,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)

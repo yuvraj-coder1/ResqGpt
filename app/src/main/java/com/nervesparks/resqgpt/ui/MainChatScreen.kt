@@ -134,8 +134,18 @@ fun MainChatScreen (
     val focusManager = LocalFocusManager.current
     println("Thread started: ${Thread.currentThread().name}")
     val Prompts = listOf(
-        "hellllo"
+        "🌍 Earthquake" to "I'm in an earthquake right now. What should I do?",
+        "🌊 Flood" to "Floodwaters are rising near my home What should I do?",
+        "🔥 Fire" to "There's smoke and fire in my building What should I do?",
+        "🌀 Cyclone" to "A cyclone warning has been issued in my area What should I do?",
+        "🌊 Tsunami" to "I just felt a strong earthquake near the coast What should I do?",
+        "🏔️ Landslide" to "The hillside near my house is cracking What should I do?",
+        "🌡️ Heatwave" to "It's extremely hot and I feel dizzy What should I do?",
+        "❄️ Blizzard" to "We’re stuck inside during a blizzard and the power is out What should I do?",
+        "🦠 Pandemic" to "I was just in contact with someone who tested positive for a contagious virus what should I do now?",
+        "☠️ Gas_leak" to "There’s a gas leak or chemical smell in the area what should I do?"
     )
+
 
     val allModelsExist = models.all { model -> model.destination.exists() }
     val Prompts_Home = listOf(
@@ -150,9 +160,6 @@ fun MainChatScreen (
         viewModel.updateMessage(recognizedText)
 
     }
-
-
-
 
 
     val focusRequester = FocusRequester()
@@ -237,54 +244,54 @@ fun MainChatScreen (
                             }
 
                             // Items for Prompts_Home
-                            items(Prompts_Home.size) { index ->
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(60.dp)
-                                        .padding(8.dp)
-                                        .background(
-                                            Color(0xFF010825),
-                                            shape = RoundedCornerShape(20.dp)
-                                        )
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 8.dp)
-                                    ) {
-                                        // Circle Icon
-                                        Box(
-                                            modifier = Modifier
-                                                .size(20.dp) // Icon size
-                                                .background(Color.White, shape = CircleShape)
-                                                .padding(4.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.info_svgrepo_com),
-                                                contentDescription = null,
-                                                tint = Color.Black
-                                            )
-                                        }
-
-                                        Spacer(modifier = Modifier.width(12.dp))
-
-                                        // Text
-                                        Text(
-                                            text = Prompts_Home.getOrNull(index) ?: "",
-                                            style = MaterialTheme.typography.bodySmall.copy(color = Color.White),
-                                            textAlign = TextAlign.Start, // Left align the text
-                                            fontSize = 12.sp,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(horizontal = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
+//                            items(Prompts_Home.size) { index ->
+//                                Box(
+//                                    contentAlignment = Alignment.Center,
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .height(60.dp)
+//                                        .padding(8.dp)
+//                                        .background(
+//                                            Color(0xFF010825),
+//                                            shape = RoundedCornerShape(20.dp)
+//                                        )
+//                                ) {
+//                                    Row(
+//                                        verticalAlignment = Alignment.CenterVertically,
+//                                        modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .padding(horizontal = 8.dp)
+//                                    ) {
+//                                        // Circle Icon
+//                                        Box(
+//                                            modifier = Modifier
+//                                                .size(20.dp) // Icon size
+//                                                .background(Color.White, shape = CircleShape)
+//                                                .padding(4.dp),
+//                                            contentAlignment = Alignment.Center
+//                                        ) {
+//                                            Icon(
+//                                                painter = painterResource(id = R.drawable.info_svgrepo_com),
+//                                                contentDescription = null,
+//                                                tint = Color.Black
+//                                            )
+//                                        }
+//
+//                                        Spacer(modifier = Modifier.width(12.dp))
+//
+//                                        // Text
+//                                        Text(
+//                                            text = Prompts_Home.getOrNull(index) ?: "",
+//                                            style = MaterialTheme.typography.bodySmall.copy(color = Color.White),
+//                                            textAlign = TextAlign.Start, // Left align the text
+//                                            fontSize = 12.sp,
+//                                            modifier = Modifier
+//                                                .weight(1f)
+//                                                .padding(horizontal = 8.dp)
+//                                        )
+//                                    }
+//                                }
+//                            }
 
                             item{
 
@@ -510,38 +517,40 @@ fun MainChatScreen (
                     //chat section ends here
                 }
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp), // Reduced space between cards
+                    horizontalArrangement = Arrangement.spacedBy(2.dp), // Reduced space between cards
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(Prompts.size) { index ->
                         if(viewModel.messages.size <= 1){
                             Card(
+
                                 modifier = Modifier
-                                    .height(100.dp)
+                                    .height(65.dp)
                                     .clickable {
-                                        viewModel.updateMessage(Prompts[index])
+                                        viewModel.updateMessage(Prompts[index].second)
                                         focusRequester.requestFocus()
                                     }
                                     .padding(horizontal = 8.dp),
-                                shape = MaterialTheme.shapes.medium,
+                                shape = RoundedCornerShape(25.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFF030815))
                             ) {
-
-                                Text(
-                                    text = Prompts[index],
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = Color(0xFFA0A0A5),
-                                        fontSize = 12.sp,
-                                    ),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .width(200.dp)
-                                        .height(100.dp)
-                                        .padding(horizontal = 15.dp, vertical = 12.dp)
-//                                                .align(Alignment.Center)
-                                )
-
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = Prompts[index].first,
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = Color(0xFFA0A0A5),
+                                            fontSize = 16.sp,
+                                        ),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .padding(horizontal = 15.dp, vertical = 12.dp)
+                                    )
+                                }
                             }
+
                         }
                     }
                 }
