@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -113,6 +115,7 @@ import com.nervesparks.resqgpt.MainViewModel
 import com.nervesparks.resqgpt.R
 import com.nervesparks.resqgpt.ui.components.DownloadModal
 import com.nervesparks.resqgpt.ui.components.LoadingModal
+import kotlinx.coroutines.delay
 
 import kotlinx.coroutines.launch
 import java.io.File
@@ -225,23 +228,63 @@ fun MainChatScreen (
 //                                item { Spacer(Modifier.height(55.dp).fillMaxWidth()) }
                             // Header Text
                             item {
-                                Text(
-                                    text = "Hello, Ask me " + "Anything",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.W300,
-                                        letterSpacing = 1.sp,
-                                        fontSize = 50.sp,
-                                        lineHeight = 60.sp
-                                    ),
-                                    fontFamily = FontFamily.SansSerif,
-                                    textAlign = TextAlign.Center,
+                                var showPart1 by remember { mutableStateOf(false) }
+                                var showPart2 by remember { mutableStateOf(false) }
+
+                                val alpha1 by animateFloatAsState(
+                                    targetValue = if (showPart1) 1f else 0f,
+                                    animationSpec = tween(durationMillis = 1000),
+                                    label = "alpha1"
+                                )
+                                val alpha2 by animateFloatAsState(
+                                    targetValue = if (showPart2) 1f else 0f,
+                                    animationSpec = tween(durationMillis = 1000),
+                                    label = "alpha2"
+                                )
+
+                                LaunchedEffect(Unit) {
+                                    showPart1 = true
+                                    delay(1000)
+                                    showPart2 = true
+                                }
+
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(16.dp)
-                                        .wrapContentHeight()
-                                )
+                                        .wrapContentHeight(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Hi there!",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = Color.White.copy(alpha = alpha1),
+                                            fontWeight = FontWeight.W300,
+                                            fontSize = 50.sp,
+                                            lineHeight = 60.sp,
+                                            letterSpacing = 1.sp
+                                        ),
+                                        fontFamily = FontFamily.SansSerif,
+                                        textAlign = TextAlign.Center
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "I'm here to help",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = Color.White.copy(alpha = alpha2),
+                                            fontWeight = FontWeight.W300,
+                                            fontSize = 50.sp,
+                                            lineHeight = 60.sp,
+                                            letterSpacing = 1.sp
+                                        ),
+                                        fontFamily = FontFamily.SansSerif,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
+
 
                             // Items for Prompts_Home
 //                            items(Prompts_Home.size) { index ->

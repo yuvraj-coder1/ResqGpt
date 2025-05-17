@@ -19,7 +19,7 @@ import com.nervesparks.resqgpt.data.GlobalVariables
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun MapContent(url: String) {
-    Column(Modifier.padding(top = 32.dp)) {
+    Column() {
         AndroidView(factory = {
             WebView(it).apply {
                 layoutParams = ViewGroup.LayoutParams(
