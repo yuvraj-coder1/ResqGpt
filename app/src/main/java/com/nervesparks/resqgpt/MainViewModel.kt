@@ -489,6 +489,11 @@ class MainViewModel(private val llamaAndroid: LLamaAndroid = LLamaAndroid.instan
             it.toMutableList().apply { add(newContact) }
         }
     }
+    fun deleteEmergencyContact(contact: EmergencyContact) {
+        _emergencyContactList.update {
+            it.toMutableList().apply { remove(contact) }
+        }
+    }
 }
 
 fun sentThreadsValue(){

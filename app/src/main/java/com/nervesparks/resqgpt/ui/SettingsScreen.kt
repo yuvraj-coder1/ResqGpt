@@ -19,6 +19,7 @@ import com.nervesparks.resqgpt.R
 
 @Composable
 fun SettingsScreen(
+    onAboutButtonClicked: () -> Unit,
     onEmergencyScreenButtonClicked: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -36,7 +37,13 @@ fun SettingsScreen(
                             shape = RoundedCornerShape(12.dp),
                         )
                 ) {
-//                    SettingsDivider()
+                    SettingsRow(
+                        text = "About",
+                        iconRes = R.drawable.information_outline_svgrepo_com,
+                        onClick = onAboutButtonClicked
+                    )
+                    SettingsDivider()
+
                     SettingsRow(
                         text = "Emergency Contacts",
                         iconRes = R.drawable.information_outline_svgrepo_com,

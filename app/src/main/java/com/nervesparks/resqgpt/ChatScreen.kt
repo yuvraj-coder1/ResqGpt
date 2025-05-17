@@ -53,12 +53,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.nervesparks.resqgpt.R
 import com.nervesparks.resqgpt.ui.AboutScreen
-import com.nervesparks.resqgpt.ui.BenchMarkScreen
 import com.nervesparks.resqgpt.ui.MainChatScreen
-import com.nervesparks.resqgpt.ui.ModelsScreen
-import com.nervesparks.resqgpt.ui.SearchResultScreen
 import com.nervesparks.resqgpt.ui.SettingsScreen
 import com.nervesparks.resqgpt.ui.components.EmergencyContactScreen
 import java.io.File
@@ -282,31 +278,34 @@ fun ChatScreen(
                 }
                 composable(route = ChatScreen.Settings.name) {
                     SettingsScreen(
+                        onAboutButtonClicked = {
+                            navController.navigate((ChatScreen.AboutScreen.name))
+                        },
                         onEmergencyScreenButtonClicked = {
                             navController.navigate((ChatScreen.EmergencyContactScreen.name))
                         }
 
                     )
                 }
-                composable(route = ChatScreen.SearchResults.name) {
-                    if (extFileDir != null) {
-                        SearchResultScreen(
-                            viewModel,
-                            downloadManager,
-                            extFileDir)
-                    }
-                }
-                composable(route = ChatScreen.ModelsScreen.name) {
-                    ModelsScreen(dm = downloadManager, extFileDir = extFileDir, viewModel = viewModel,onSearchResultButtonClick = {navController.navigate(
-                        ChatScreen.SearchResults.name
-                    )})
-                }
+//                composable(route = ChatScreen.SearchResults.name) {
+//                    if (extFileDir != null) {
+//                        SearchResultScreen(
+//                            viewModel,
+//                            downloadManager,
+//                            extFileDir)
+//                    }
+//                }
+//                composable(route = ChatScreen.ModelsScreen.name) {
+//                    ModelsScreen(dm = downloadManager, extFileDir = extFileDir, viewModel = viewModel,onSearchResultButtonClick = {navController.navigate(
+//                        ChatScreen.SearchResults.name
+//                    )})
+//                }
                 composable(route = ChatScreen.AboutScreen.name){
                     AboutScreen()
                 }
-                composable(route = ChatScreen.BenchMarkScreen.name){
-                    BenchMarkScreen(viewModel)
-                }
+//                composable(route = ChatScreen.BenchMarkScreen.name){
+//                    BenchMarkScreen(viewModel)
+//                }
                 composable(route = ChatScreen.EmergencyContactScreen.name) {
                     EmergencyContactScreen(
                         modifier = Modifier,

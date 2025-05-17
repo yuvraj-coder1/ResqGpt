@@ -345,7 +345,7 @@ fun MainChatScreen (
                                                 if(role == "assistant") {
                                                     Image(
                                                         painter = painterResource(
-                                                            id = R.drawable.logo
+                                                            id = R.drawable.bot_icon
                                                         ),
                                                         contentDescription =  "Bot Icon",
                                                         modifier = Modifier.size(20.dp)
@@ -391,7 +391,7 @@ fun MainChatScreen (
                                                         ){
                                                             Text(
                                                                 text = if (trimmedMessage.startsWith("") && trimmedMessage.length>=3) {
-                                                                    trimmedMessage.substring(1)
+                                                                    trimmedMessage.substring(0)
                                                                 } else {
                                                                     trimmedMessage
                                                                 },
