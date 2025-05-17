@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nervesparks.iris"
+    namespace = "com.nervesparks.resqgpt"
     compileSdk = 35
 
     ndkVersion = "26.1.10909125"

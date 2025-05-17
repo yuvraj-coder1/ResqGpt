@@ -1,4 +1,4 @@
-package com.nervesparks.iris.ui.theme
+package com.nervesparks.resqgpt.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

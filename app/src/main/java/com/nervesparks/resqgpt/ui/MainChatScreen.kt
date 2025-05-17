@@ -66,7 +66,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -107,14 +106,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
-import androidx.compose.ui.window.Dialog
 import com.nervesparks.resqgpt.Downloadable
 import com.nervesparks.resqgpt.LinearGradient
 import com.nervesparks.resqgpt.MainViewModel
 
 import com.nervesparks.resqgpt.R
-import com.nervesparks.resqgpt.ui.components.ChatMessageList
-import com.nervesparks.resqgpt.ui.components.DownloadModal
 import com.nervesparks.resqgpt.ui.components.LoadingModal
 
 import kotlinx.coroutines.launch
@@ -123,7 +119,7 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MainChatScreen (
+fun MainChatScreen(
     onNextButtonClicked: () -> Unit,
     viewModel: MainViewModel,
     clipboard: ClipboardManager,
@@ -131,13 +127,13 @@ fun MainChatScreen (
     models: List<Downloadable>,
     extFileDir: File?,
 
-    ){
+    ) {
     val kc = LocalSoftwareKeyboardController.current
     val windowInsets = WindowInsets.ime
     val focusManager = LocalFocusManager.current
     println("Thread started: ${Thread.currentThread().name}")
     val Prompts = listOf(
-        "hi"
+        "hellllo"
     )
 
     val allModelsExist = models.all { model -> model.destination.exists() }
@@ -145,17 +141,14 @@ fun MainChatScreen (
         "check"
     )
     var recognizedText by remember { mutableStateOf("") }
-    val speechRecognizerLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            result ->
-        val data = result.data
-        val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-        recognizedText = results?.get(0)?:""
-        viewModel.updateMessage(recognizedText)
+    val speechRecognizerLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
+            val data = result.data
+            val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            recognizedText = results?.get(0) ?: ""
+            viewModel.updateMessage(recognizedText)
 
-    }
-
-
-
+        }
 
 
     val focusRequester = FocusRequester()
@@ -170,7 +163,6 @@ fun MainChatScreen (
 
     ) {
         LinearGradient()
-
 
 
         // Screen content
@@ -195,20 +187,21 @@ fun MainChatScreen (
                 val scrollState = rememberLazyListState()
 
 
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                kc?.hide()
-                            },
-                            onDoubleTap = { kc?.hide() },
-                            onLongPress = { kc?.hide() },
-                            onPress = { kc?.hide() },
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = {
+                                    kc?.hide()
+                                },
+                                onDoubleTap = { kc?.hide() },
+                                onLongPress = { kc?.hide() },
+                                onPress = { kc?.hide() },
 
 
-                            )
-                    }) {
+                                )
+                        }) {
 
                     if (viewModel.messages.isEmpty() && !viewModel.showModal && !viewModel.showAlert) {
                         LazyColumn(
@@ -289,19 +282,21 @@ fun MainChatScreen (
                                 }
                             }
 
-                            item{
+                            item {
 
                             }
                         }
-                    }
-                    else {
+                    } else {
 
                         LazyColumn(state = scrollState) {
                             // Track the first user and assistant messages
 
                             var length = viewModel.messages.size
 
-                            itemsIndexed(viewModel.messages.slice(3..< length) as? List<Map<String, String>> ?: emptyList()) { index, messageMap ->
+                            itemsIndexed(
+                                viewModel.messages.slice(3..<length) as? List<Map<String, String>>
+                                    ?: emptyList()
+                            ) { index, messageMap ->
                                 val role = messageMap["role"] ?: ""
                                 val content = messageMap["content"] ?: ""
                                 val trimmedMessage = if (content.endsWith("\n")) {
@@ -316,12 +311,13 @@ fun MainChatScreen (
                                     if (role != "codeBlock") {
                                         Box {
                                             val context = LocalContext.current
-                                            val interactionSource = remember { MutableInteractionSource() }
+                                            val interactionSource =
+                                                remember { MutableInteractionSource() }
                                             val sheetState = rememberModalBottomSheetState()
                                             var isSheetOpen by rememberSaveable {
                                                 mutableStateOf(false)
                                             }
-                                            if(isSheetOpen){
+                                            if (isSheetOpen) {
                                                 MessageBottomSheet(
                                                     message = trimmedMessage,
                                                     clipboard = clipboard,
@@ -345,43 +341,44 @@ fun MainChatScreen (
                                                         bottom = 0.dp
                                                     ),
                                             ) {
-                                                if(role == "assistant") {
+                                                if (role == "assistant") {
                                                     Image(
                                                         painter = painterResource(
                                                             id = R.drawable.logo
                                                         ),
-                                                        contentDescription =  "Bot Icon",
+                                                        contentDescription = "Bot Icon",
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                 }
-                                                Box(modifier = Modifier
-                                                    .padding(horizontal = 2.dp)
-                                                    .background(
-                                                        color = if (role == "user") Color(
-                                                            0xFF171E2C
-                                                        ) else Color.Transparent,
-                                                        shape = RoundedCornerShape(12.dp),
-                                                    )
-                                                    .combinedClickable(
-                                                        interactionSource = interactionSource,
-                                                        indication = ripple(color = Color.Gray),
-                                                        onLongClick = {
-                                                            if (viewModel.getIsSending()) {
-                                                                Toast
-                                                                    .makeText(
-                                                                        context,
-                                                                        " Wait till generation is done! ",
-                                                                        Toast.LENGTH_SHORT
-                                                                    )
-                                                                    .show()
-                                                            } else {
-                                                                isSheetOpen = true
+                                                Box(
+                                                    modifier = Modifier
+                                                        .padding(horizontal = 2.dp)
+                                                        .background(
+                                                            color = if (role == "user") Color(
+                                                                0xFF171E2C
+                                                            ) else Color.Transparent,
+                                                            shape = RoundedCornerShape(12.dp),
+                                                        )
+                                                        .combinedClickable(
+                                                            interactionSource = interactionSource,
+                                                            indication = ripple(color = Color.Gray),
+                                                            onLongClick = {
+                                                                if (viewModel.getIsSending()) {
+                                                                    Toast
+                                                                        .makeText(
+                                                                            context,
+                                                                            " Wait till generation is done! ",
+                                                                            Toast.LENGTH_SHORT
+                                                                        )
+                                                                        .show()
+                                                                } else {
+                                                                    isSheetOpen = true
+                                                                }
+                                                            },
+                                                            onClick = {
+                                                                kc?.hide()
                                                             }
-                                                        },
-                                                        onClick = {
-                                                            kc?.hide()
-                                                        }
-                                                    )
+                                                        )
                                                 ) {
                                                     Row(
                                                         modifier = Modifier
@@ -391,21 +388,29 @@ fun MainChatScreen (
                                                             modifier = Modifier
                                                                 .widthIn(max = 300.dp)
                                                                 .padding(3.dp)
-                                                        ){
+                                                        ) {
                                                             Text(
-                                                                text = if (trimmedMessage.startsWith("```")) {
-                                                                    trimmedMessage.substring(3)
+                                                                text = if (trimmedMessage.startsWith(
+                                                                        ""
+                                                                    ) && trimmedMessage.length >= 3
+                                                                ) {
+                                                                    trimmedMessage.substring(1)
                                                                 } else {
                                                                     trimmedMessage
                                                                 },
-                                                                style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFA0A0A5)),
+                                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                                    color = Color(0xFFA0A0A5)
+                                                                ),
                                                                 modifier = Modifier
-                                                                    .padding(start = 1.dp, end = 1.dp)
+                                                                    .padding(
+                                                                        start = 1.dp,
+                                                                        end = 1.dp
+                                                                    )
                                                             )
                                                         }
                                                     }
                                                 }
-                                                if(role == "user") {
+                                                if (role == "user") {
                                                     Image(
                                                         painter = painterResource(
                                                             id = R.drawable.user_icon
@@ -418,7 +423,8 @@ fun MainChatScreen (
                                         }
                                     } else {
                                         val context = LocalContext.current
-                                        val interactionSource = remember { MutableInteractionSource() }
+                                        val interactionSource =
+                                            remember { MutableInteractionSource() }
                                         val sheetState = rememberModalBottomSheetState()
                                         var isSheetOpen by rememberSaveable {
                                             mutableStateOf(false)
@@ -433,7 +439,7 @@ fun MainChatScreen (
                                                 )
                                                 .fillMaxWidth()
                                         ) {
-                                            if(isSheetOpen){
+                                            if (isSheetOpen) {
                                                 MessageBottomSheet(
                                                     message = trimmedMessage,
                                                     clipboard = clipboard,
@@ -446,7 +452,8 @@ fun MainChatScreen (
                                                     sheetState = sheetState
                                                 )
                                             }
-                                            Column(modifier = Modifier.combinedClickable(
+                                            Column(
+                                                modifier = Modifier.combinedClickable(
                                                 interactionSource = interactionSource,
                                                 indication = ripple(color = Color.LightGray),
                                                 onLongClick = {
@@ -480,7 +487,7 @@ fun MainChatScreen (
                                                     // Previous content here
                                                 }
                                                 Text(
-                                                    text = if (trimmedMessage.startsWith("```")) {
+                                                    text = if (trimmedMessage.length > 3) {
                                                         trimmedMessage.substring(3)
                                                     } else {
                                                         trimmedMessage
@@ -496,9 +503,11 @@ fun MainChatScreen (
                                 }
                             }
                             item {
-                                Spacer(modifier = Modifier
-                                    .height(1.dp)
-                                    .fillMaxWidth())
+                                Spacer(
+                                    modifier = Modifier
+                                        .height(1.dp)
+                                        .fillMaxWidth()
+                                )
                             }
                         }
 
@@ -517,7 +526,7 @@ fun MainChatScreen (
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(Prompts.size) { index ->
-                        if(viewModel.messages.size <= 1){
+                        if (viewModel.messages.size <= 1) {
                             Card(
                                 modifier = Modifier
                                     .height(100.dp)
@@ -590,7 +599,6 @@ fun MainChatScreen (
                         }
 
 
-
                         val dragSelection = remember { mutableStateOf<TextRange?>(null) }
                         val lastKnownText = remember { mutableStateOf(viewModel.message) }
 
@@ -613,6 +621,7 @@ fun MainChatScreen (
                                         // preserve the current cursor/selection position
                                         textFieldValue.value.selection
                                     }
+
                                     else -> {
                                         // Otherwise, use the drag selection or current selection
                                         dragSelection.value ?: textFieldValue.value.selection
@@ -621,11 +630,12 @@ fun MainChatScreen (
                             ),
                             onValueChange = { newValue ->
                                 // Update drag selection when the user drags or selects
-                                dragSelection.value = if (newValue.text == textFieldValue.value.text) {
-                                    newValue.selection
-                                } else {
-                                    null // Reset drag selection if the text changes programmatically
-                                }
+                                dragSelection.value =
+                                    if (newValue.text == textFieldValue.value.text) {
+                                        newValue.selection
+                                    } else {
+                                        null // Reset drag selection if the text changes programmatically
+                                    }
 
 
                                 // Update the local state
@@ -665,11 +675,14 @@ fun MainChatScreen (
                             val context = LocalContext.current
 
                             IconButton(onClick = {
-                                if(viewModel.loadedModelName.value == ""){
+                                if (viewModel.loadedModelName.value == "") {
                                     focusManager.clearFocus()
-                                    Toast.makeText(context, "Load A Model First", Toast.LENGTH_SHORT).show()
-                                }
-                                else {
+                                    Toast.makeText(
+                                        context,
+                                        "Load A Model First",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
                                     viewModel.send()
                                     focusManager.clearFocus()
                                 }
@@ -686,7 +699,8 @@ fun MainChatScreen (
                             }
                         } else if (viewModel.getIsSending()) {
                             IconButton(onClick = {
-                                viewModel.stop() }) {
+                                viewModel.stop()
+                            }) {
                                 Icon(
                                     modifier = Modifier
                                         .weight(1f)
@@ -708,11 +722,13 @@ fun MainChatScreen (
     }
 
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBottomSheet(
     viewModel: MainViewModel,
-    onDismiss: () -> Unit) {
+    onDismiss: () -> Unit
+) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val sheetScrollState = rememberLazyListState()
     ModalBottomSheet(
@@ -723,7 +739,7 @@ fun SettingsBottomSheet(
         Column(
             modifier = Modifier
                 .padding(10.dp)
-        ){
+        ) {
             Text(
                 text = "Settings",
                 color = Color.White,
@@ -734,7 +750,7 @@ fun SettingsBottomSheet(
                 textAlign = TextAlign.Center
             )
             LazyColumn(state = sheetScrollState) {
-                item{
+                item {
                     Box(
                         modifier = Modifier
                             .background(
@@ -797,7 +813,8 @@ fun SettingsBottomSheet(
                                 onClick = {
                                     viewModel.currentDownloadable?.destination?.path?.let {
                                         viewModel.load(
-                                            it, viewModel.user_thread.toInt())
+                                            it, viewModel.user_thread.toInt()
+                                        )
                                     }
                                 }
                             ) {
@@ -936,7 +953,7 @@ fun ModelSelectorWithDownloadModal(
     Column(Modifier.padding(20.dp)) {
 
         OutlinedTextField(
-            value= viewModel.loadedModelName.value,
+            value = viewModel.loadedModelName.value,
             onValueChange = { mSelectedText = it },
             modifier = Modifier
                 .fillMaxWidth()
@@ -962,7 +979,7 @@ fun ModelSelectorWithDownloadModal(
                     icon,
                     contentDescription = "Toggle dropdown",
                     Modifier.clickable { mExpanded = !mExpanded },
-                    tint =Color(0xFFcfcfd1)
+                    tint = Color(0xFFcfcfd1)
                 )
             },
             textStyle = TextStyle(color = Color(0xFFf5f5f5)),

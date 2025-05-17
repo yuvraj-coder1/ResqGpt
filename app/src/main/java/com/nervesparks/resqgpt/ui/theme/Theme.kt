@@ -1,4 +1,4 @@
-package com.nervesparks.iris.ui.theme
+package com.nervesparks.resqgpt.ui.theme
 //
 //import android.app.Activity
 //import android.os.Build
