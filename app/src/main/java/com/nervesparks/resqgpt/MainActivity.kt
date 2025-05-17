@@ -4,13 +4,17 @@ import android.app.DownloadManager
 import android.content.ClipboardManager
 import android.llama.cpp.LLamaAndroid
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.widget.Toast
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.getSystemService
@@ -37,6 +42,11 @@ import java.io.File
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.nervesparks.resqgpt.data.UserPreferencesRepository
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import android.Manifest
+import androidx.compose.runtime.LaunchedEffect
+
 
 class MainViewModelFactory(
     private val llamaAndroid: LLamaAndroid,
@@ -144,8 +154,7 @@ class MainActivity(
 
 
         setContent {
-
-
+            RequestLocationOnLaunch()
             var showSettingSheet by remember { mutableStateOf(false) }
             var isBottomSheetVisible by rememberSaveable  { mutableStateOf(false) }
             var modelData by rememberSaveable  { mutableStateOf<List<Map<String, String>>?>(null) }
@@ -195,6 +204,37 @@ fun LinearGradient() {
     Box(modifier = Modifier.background(gradient).fillMaxSize())
 }
 
+@Composable
+fun RequestLocationOnLaunch() {
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        Toast.makeText(
+            context,
+            if (granted) "Location permission granted!" else "Location permission denied.",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    // Auto-trigger when composable enters the composition
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            } else {
+                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
+        )
+    }
+}
 
 
 

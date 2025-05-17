@@ -256,7 +256,7 @@ fun MainChatScreen (
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "Hi there!",
+                                        text = "Hi there,",
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = Color.White.copy(alpha = alpha1),
                                             fontWeight = FontWeight.W300,
@@ -271,7 +271,7 @@ fun MainChatScreen (
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     Text(
-                                        text = "I'm here to help",
+                                        text = "I'm here to help!",
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = Color.White.copy(alpha = alpha2),
                                             fontWeight = FontWeight.W300,
@@ -406,7 +406,7 @@ fun MainChatScreen (
                                                     .background(
                                                         color = if (role == "user") Color(
                                                             0xFF171E2C
-                                                        ) else Color.Transparent,
+                                                        ) else Color(0xFF171E2C),
                                                         shape = RoundedCornerShape(12.dp),
                                                     )
                                                     .combinedClickable(
