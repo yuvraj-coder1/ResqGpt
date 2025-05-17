@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <style>
+        #map { height: 100vh; width: 100%; }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #find-me {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #find-me:hover {
+            background-color: #0056b3;
+        }
+        #filter {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="controls">
+    <select id="filter">
+        <option value="all">Show All</option>
+        <option value="glampinghub">Safe Camp</option>
+        <option value="mapfling">Help Needed</option>
+        <option value="mapmyindia">Other</option>
+    </select>
+    <button id="find-me">Find My Location</button>
+</div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+<script>
+    var map = L.map('map');
+    var routingControl;
+    var userLocation = null;
+    var markers = [];
+
+<!--    var customZ = JSON.parse(Android.getCustomPins());-->
+    var customZ = [];
+
+    try {
+        customZ = JSON.parse(Android.getCustomPins());
+    } catch (e) {
+        console.warn('Using already allotted pins!');
+        customZ = [
+            { lat: 12.90, lon: 77.56, title: "Safe Camp", color: "glampinghub" },
+            { lat: 12.908345, lon: 77.561432, title: "Safe Camp", color: "glampinghub" },
+            { lat: 12.906490, lon: 77.573024, title: "Safe Camp", color: "glampinghub" },
+            { lat: 12.911597, lon: 77.563945, title: "Safe Camp", color: "glampinghub" },
+            { lat: 12.908954, lon: 77.581231, title: "Safe Camp", color: "glampinghub" },
+            { lat: 12.909501, lon: 77.566833, title: "Help Needed", color: "mapfling" },
+            { lat: 12.907318, lon: 77.567385, title: "Help Needed", color: "mapfling" },
+            { lat: 12.910725, lon: 77.566916, title: "Help Needed", color: "mapfling" }
+        ];
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Retrieve custom pins data from the Android interface
+        var customPins = JSON.parse(Android.getCustomPins());
+
+        // Set up custom pins using the retrieved data
+        setupCustomPins(customPins);
+    });
+
+    function initializeMap(lat, lon) {
+        map.setView([lat, lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    }
+
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                userLocation = L.latLng(position.coords.latitude, position.coords.longitude);
+                initializeMap(userLocation.lat, userLocation.lng);
+                L.marker(userLocation).addTo(map)
+                    .bindPopup('You are here')
+                    .openPopup();
+
+                // Setup custom pins with different colors
+                setupCustomPins(customZ);
+            }, function(error) {
+                alert('Error getting location: ' + error.message);
+                initializeMap(12.907374, 77.566299);
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+            initializeMap(12.907374, 77.566299);
+        }
+    }
+
+    function setupCustomPins(pins) {
+
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        pins.forEach(function(pin) {
+            var icon = L.icon({
+                iconUrl: `https://www.google.com/s2/favicons?domain=${pin.color}.com`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+
+            var marker = L.marker([pin.lat, pin.lon], { icon: icon }).addTo(map)
+                .bindPopup(pin.title);
+
+            marker.on('click', function() {
+                if (userLocation) {
+                    showRoute(userLocation, marker.getLatLng());
+                }
+            });
+
+            markers.push(marker);
+        });
+    }
+
+    function showRoute(start, end) {
+        if (routingControl) {
+            map.removeControl(routingControl);
+        }
+
+        routingControl = L.Routing.control({
+            waypoints: [
+                start,
+                end
+            ],
+            router: L.Routing.osrmv1({
+                language: 'en',
+                profile: 'driving'
+            }),
+            createMarker: function() { return null; },
+        }).addTo(map);
+    }
+
+    document.getElementById('filter').addEventListener('change', function(event) {
+        var selectedColor = event.target.value;
+        if (selectedColor === 'all') {
+            setupCustomPins(customZ);
+        } else {
+            // Filter pins based on the selected color
+            setupCustomPins(customZ);
+            markers.forEach(marker => {
+                marker.remove();
+                if (marker.options.icon.options.iconUrl.includes(selectedColor)) {
+                    marker.addTo(map);
+                }
+            });
+        }
+    });
+
+    getCurrentLocation();
+
+    document.getElementById('find-me').addEventListener('click', function() {
+        getCurrentLocation();
+    });
+</script>
+</body>
+</html>

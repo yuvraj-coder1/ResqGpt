@@ -59,6 +59,7 @@ import com.nervesparks.resqgpt.ui.MainChatScreen
 
 import com.nervesparks.resqgpt.ui.SettingsScreen
 import com.nervesparks.resqgpt.ui.components.EmergencyContactScreen
+import com.nervesparks.resqgpt.ui.components.MapContent
 import java.io.File
 import android.Manifest
 import android.content.pm.PackageManager
@@ -77,7 +78,8 @@ enum class ChatScreen(@StringRes val title: Int) {
     ParamsScreen(title = R.string.parameters_screen_title),
     AboutScreen(title = R.string.about_screen_title),
     BenchMarkScreen(title = R.string.benchmark_screen_title),
-    EmergencyContactScreen(R.string.emergency_contact)
+    EmergencyContactScreen(R.string.emergency_contact),
+    MapScreen(R.string.map)
 }
 
 
@@ -315,7 +317,7 @@ fun ChatScreen(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = ChatScreen.Start.name,
+                startDestination = ChatScreen.MapScreen.name,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -368,6 +370,9 @@ fun ChatScreen(
                         modifier = Modifier,
                         viewModel = viewModel
                     )
+                }
+                composable(route = ChatScreen.MapScreen.name) {
+                    MapContent(url = "file:///android_asset/map.html")
                 }
             }
         }
