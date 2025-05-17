@@ -36,7 +36,6 @@ fun DownloadModal(viewModel: MainViewModel, dm: DownloadManager, models: List<Do
             ) {
                 HeaderText("Download Required")
                 HeaderText("Don't close or minimize the app!")
-                HeaderModelText("Download at least 1 model")
                 LazyColumn(
                     modifier = Modifier
                         .padding(16.dp)
