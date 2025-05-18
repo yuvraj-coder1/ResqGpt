@@ -62,6 +62,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nervesparks.resqgpt.ui.AboutScreen
 import com.nervesparks.resqgpt.ui.MainChatScreen
+import com.nervesparks.resqgpt.ui.MessageScreen
 import com.nervesparks.resqgpt.ui.SettingsScreen
 import com.nervesparks.resqgpt.ui.components.EmergencyContactScreen
 import com.nervesparks.resqgpt.ui.components.MapContent
@@ -77,7 +78,8 @@ enum class ChatScreen(@StringRes val title: Int) {
     AboutScreen(title = R.string.about_screen_title),
     BenchMarkScreen(title = R.string.benchmark_screen_title),
     EmergencyContactScreen(R.string.emergency_contact),
-    MapScreen(R.string.map)
+    MapScreen(R.string.map),
+    MessageScreen(R.string.message_screen)
 }
 
 
@@ -341,7 +343,7 @@ fun ChatScreen(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = ChatScreen.Start.name,
+                startDestination = ChatScreen.MessageScreen.name,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -391,6 +393,12 @@ fun ChatScreen(
 //                }
                 composable(route = ChatScreen.EmergencyContactScreen.name) {
                     EmergencyContactScreen(
+                        modifier = Modifier,
+                        viewModel = viewModel
+                    )
+                }
+                composable(route = ChatScreen.MessageScreen.name) {
+                    MessageScreen(
                         modifier = Modifier,
                         viewModel = viewModel
                     )

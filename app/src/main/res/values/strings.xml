@@ -1,5 +1,12 @@
 <resources>
     <string name="app_name">ResQ-GPT</string>
+    <!-- Permission related strings -->
+    <string name="permission_bluetooth">Allow Bluetooth access for device connections</string>
+    <string name="permission_location">Allow location access to discover nearby devices</string>
+    <string name="permission_bluetooth_scan">Allow Bluetooth scanning for nearby devices</string>
+    <string name="permission_bluetooth_advertise">Allow this device to be discoverable</string>
+    <string name="permission_bluetooth_connect">Allow connecting to Bluetooth devices</string>
+    <string name="permission_wifi_devices">Allow discovering nearby Wi-Fi devices</string>
     <string name="settings_screen_title">Settings</string>
     <string name="search_results_screen_title">Search</string>
     <string name="parameters_screen_title">Parameters</string>
@@ -11,4 +18,5 @@
     <string name="refresh_button">Refresh</string>
     <string name="emergency_contact">Emergency Contact</string>
     <string name="map">Map</string>
+    <string name="message_screen">Message Screen</string>
 </resources>
