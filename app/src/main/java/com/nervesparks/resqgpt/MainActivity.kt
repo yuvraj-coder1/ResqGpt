@@ -1,5 +1,6 @@
 package com.nervesparks.resqgpt
 
+//import com.nervesparks.resqgpt.nearbyConnectionApi.CodenameGenerator
 import android.Manifest
 import android.app.DownloadManager
 import android.content.ClipboardManager
@@ -12,11 +13,10 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.widget.Toast
-
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
 import androidx.compose.foundation.background
@@ -38,37 +38,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.getSystemService
-import java.io.File
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.nearby.Nearby
-import com.google.android.gms.nearby.connection.ConnectionsClient
-import com.google.android.gms.nearby.connection.Strategy
-import com.nervesparks.resqgpt.data.UserPreferencesRepository
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import android.Manifest
-import androidx.compose.runtime.LaunchedEffect
-
-//import com.nervesparks.resqgpt.nearbyConnectionApi.CodenameGenerator
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
 import com.google.android.gms.nearby.connection.ConnectionResolution
+import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
 import com.google.android.gms.nearby.connection.DiscoveryOptions
 import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
 import com.google.android.gms.nearby.connection.Payload
 import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
+import com.google.android.gms.nearby.connection.Strategy
+import com.nervesparks.resqgpt.data.UserPreferencesRepository
+import java.io.File
 import kotlin.random.Random
-import kotlin.text.Charsets.UTF_8
 
 class MainViewModelFactory(
     private val llamaAndroid: LLamaAndroid,

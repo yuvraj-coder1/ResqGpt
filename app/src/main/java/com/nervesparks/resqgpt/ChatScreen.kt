@@ -343,7 +343,7 @@ fun ChatScreen(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = ChatScreen.MessageScreen.name,
+                startDestination = ChatScreen.Start.name,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -367,6 +367,9 @@ fun ChatScreen(
                         },
                         onEmergencyScreenButtonClicked = {
                             navController.navigate((ChatScreen.EmergencyContactScreen.name))
+                        },
+                        onMessagesScreenButtonClicked = {
+                            navController.navigate((ChatScreen.MessageScreen.name))
                         }
 
                     )

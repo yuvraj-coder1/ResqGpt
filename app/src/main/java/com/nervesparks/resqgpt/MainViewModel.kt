@@ -101,8 +101,6 @@ class MainViewModel(
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     }
 
-    private fun loadDefaultModelName() {
-
     fun loadContactsFromPrefs(context: Context) {
         val list = loadEmergencyContacts(context)
         _emergencyContactList.value = list
@@ -835,6 +833,7 @@ class MainViewModel(
         )
     }
 }
+
 
 fun sentThreadsValue() {
 

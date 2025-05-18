@@ -20,7 +20,8 @@ import com.nervesparks.resqgpt.R
 @Composable
 fun SettingsScreen(
     onAboutButtonClicked: () -> Unit,
-    onEmergencyScreenButtonClicked: () -> Unit
+    onEmergencyScreenButtonClicked: () -> Unit,
+    onMessagesScreenButtonClicked: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -48,6 +49,13 @@ fun SettingsScreen(
                         text = "Emergency Contacts",
                         iconRes = R.drawable.information_outline_svgrepo_com,
                         onClick = onEmergencyScreenButtonClicked
+                    )
+                    SettingsDivider()
+
+                    SettingsRow(
+                        text = "Rescue Connect",
+                        iconRes = R.drawable.information_outline_svgrepo_com,
+                        onClick = onMessagesScreenButtonClicked
                     )
                 }
             }
