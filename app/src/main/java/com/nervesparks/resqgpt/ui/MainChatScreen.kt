@@ -547,6 +547,52 @@ fun MainChatScreen (
                                     .height(1.dp)
                                     .fillMaxWidth())
                             }
+
+                            // Add loading indicator when model is processing but hasn't started responding
+                            if (viewModel.getIsSending() && viewModel.messages.lastOrNull()?.get("role") == "user") {
+                                item {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Start,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                start = 8.dp,
+                                                top = 8.dp,
+                                                end = 8.dp,
+                                                bottom = 0.dp
+                                            ),
+                                    ) {
+                                        Image(
+                                            painter = painterResource(
+                                                id = R.drawable.settings_gear_rounded
+                                            ),
+                                            contentDescription = "Bot Icon",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(horizontal = 2.dp)
+                                                .background(
+                                                    color = Color(0xFF171E2C),
+                                                    shape = RoundedCornerShape(12.dp),
+                                                )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .padding(5.dp)
+                                                    .widthIn(max = 300.dp)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                                                ) {
+                                                    LoadingAnimation()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         ScrollToBottomButton(
@@ -757,6 +803,31 @@ fun MainChatScreen (
     }
 
 }
+
+// LoadingAnimation composable that displays animated dots when the model is thinking
+@Composable
+fun LoadingAnimation() {
+    val dots = listOf(".", "..", "...")
+    var currentDots by remember { mutableStateOf(dots[0]) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            for (dot in dots) {
+                currentDots = dot
+                delay(300) // Change dots every 300ms for smooth animation
+            }
+        }
+    }
+
+    Text(
+        text = "Thinking$currentDots",
+        style = MaterialTheme.typography.bodyLarge.copy(
+            color = Color(0xFFA0A0A5),
+            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+        ),
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBottomSheet(
