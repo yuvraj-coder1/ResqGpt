@@ -226,7 +226,7 @@ class MainActivity(
 //                File(extFilesDir, "Llama-3.2-1B-Instruct-Q6_K_L.gguf")
 //            ),
             Downloadable(
-                "stablelm-2-1_6b-chat.Q4_K_M.imx.gguf",
+                "mistral-merged-disaster-qa.gguf",
                 Uri.parse("https://huggingface.co/Crataco/stablelm-2-1_6b-chat-imatrix-GGUF/resolve/main/stablelm-2-1_6b-chat.Q4_K_M.imx.gguf?download=true"),
                 File(extFilesDir, "stablelm-2-1_6b-chat.Q4_K_M.imx.gguf")
             )
